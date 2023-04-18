@@ -1,9 +1,4 @@
-#include <asm/asm.h>
-#include <env.h>
-#include <kclock.h>
-#include <pmap.h>
-#include <printk.h>
-#include <trap.h>
+// #include <printk.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
@@ -11,8 +6,8 @@
 #include <generated/init_override.h>
 #else
 
-void mips_init() {
-	printk("init.c:\tmips_init() is called\n");
+void rv32_init() {
+	//printk("init.c:\trv32_init() is called\n");
 
 	// lab2:
 	// mips_detect_memory();

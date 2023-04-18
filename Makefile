@@ -10,25 +10,25 @@ link_script             := kernel.lds
 modules                 := lib init kern
 targets                 := $(mos_elf)
 syms_file               := $(target_dir)/prog.syms
-gxemul_files            += $(mos_elf)
+qemu_files            += $(mos_elf)
 
 lab-ge = $(shell [ "$$(echo $(lab)_ | cut -f1 -d_)" -ge $(1) ] && echo true)
 
-ifeq ($(call lab-ge,3),true)
-	user_modules    += user/bare
-endif
+# ifeq ($(call lab-ge,3),true)
+# 	user_modules    += user/bare
+# endif
 
-ifeq ($(call lab-ge,4),true)
-	user_modules    += user
-endif
+# ifeq ($(call lab-ge,4),true)
+# 	user_modules    += user
+# endif
 
-ifeq ($(call lab-ge,5),true)
-	user_modules    += fs
-	targets         += fs-image
-endif
+# ifeq ($(call lab-ge,5),true)
+# 	user_modules    += fs
+# 	targets         += fs-image
+# endif
 
-gxemul_flags            += -T -C R3000 -M 64
-CFLAGS                  += -DLAB=$(shell echo $(lab) | cut -f1 -d_)
+qemu_flags              += -machine virt -m 64M -nographic -no-reboot
+# CFLAGS                  += -DLAB=$(shell echo $(lab) | cut -f1 -d_)
 
 objects                 := $(addsuffix /*.o, $(modules)) $(addsuffix /*.x, $(user_modules))
 modules                 += $(user_modules)
@@ -77,16 +77,16 @@ clean:
 ifneq ($(prog),)
 dbg:
 	$(CROSS_COMPILE)nm -S '$(prog)' > $(syms_file)
-	@gxemul_files=$(syms_file) gxemul_flags=-V $(MAKE) run
+	@qemu_files=$(syms_file) qemu_flags=-V $(MAKE) run
 else
-dbg: gxemul_flags += -V
+dbg: qemu_flags += -s -S
 dbg: run
 endif
 
-run: gxemul_flags += -E $(shell gxemul -H | grep -q oldtestmips && echo old)testmips \
+#run: qemu_flags += -E $(shell gxemul -H | grep -q oldtestmips && echo old)testmips \
 			$(shell [ -f '$(user_disk)' ] && echo '-d $(user_disk)')
 run:
-	gxemul $(gxemul_flags) $(gxemul_files)
+	qemu-system-riscv32 -kernel $(qemu_files) $(qemu_flags)
 
 objdump:
 	@find * \( -name '*.b' -o -path $(mos_elf) \) -exec sh -c \

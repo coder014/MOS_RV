@@ -17,7 +17,7 @@ void *memcpy(void *dst, const void *src, size_t n) {
 
 	// copy machine words while possible
 	while (dst + 4 <= max) {
-		*(uint32_t *)dst = *(uint32_t *)src;
+		*(u_int *)dst = *(u_int *)src;
 		dst += 4;
 		src += 4;
 	}
@@ -33,7 +33,7 @@ void *memset(void *dst, int c, size_t n) {
 	void *dstaddr = dst;
 	void *max = dst + n;
 	u_char byte = c & 0xff;
-	uint32_t word = byte | byte << 8 | byte << 16 | byte << 24;
+	u_int word = byte | byte << 8 | byte << 16 | byte << 24;
 
 	while (((u_long)dst & 3) && dst < max) {
 		*(u_char *)dst++ = byte;
@@ -41,7 +41,7 @@ void *memset(void *dst, int c, size_t n) {
 
 	// fill machine words while possible
 	while (dst + 4 <= max) {
-		*(uint32_t *)dst = word;
+		*(u_int *)dst = word;
 		dst += 4;
 	}
 

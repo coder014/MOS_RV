@@ -2,7 +2,6 @@
 #define _INC_TYPES_H_
 
 #include <stddef.h>
-#include <stdint.h>
 
 typedef unsigned char u_char;
 typedef unsigned short u_short;

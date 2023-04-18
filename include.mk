@@ -1,11 +1,11 @@
 # ENDIAN is either EL (little endian) or EB (big endian)
 ENDIAN         := EL
 
-CROSS_COMPILE  := mips-linux-gnu-
+CROSS_COMPILE  := riscv64-unknown-elf-
 CC             := $(CROSS_COMPILE)gcc
-CFLAGS         += --std=gnu99 -$(ENDIAN) -G 0 -mno-abicalls -fno-pic -ffreestanding -fno-stack-protector -fno-builtin -Wa,-xgot -Wall -mxgot -mfp32 -march=r3000
+CFLAGS         += --std=gnu99 -mcmodel=medlow -mno-plt -fno-pic -ffreestanding -fno-stack-protector -fno-builtin -Wall -march=rv32im -mabi=ilp32
 LD             := $(CROSS_COMPILE)ld
-LDFLAGS        += -$(ENDIAN) -G 0 -static -n -nostdlib --fatal-warnings
+LDFLAGS        += -m elf32lriscv -G 0 -static -n -nostdlib --no-relax --fatal-warnings
 
 HOST_CC        := cc
 HOST_CFLAGS    += --std=gnu99 -O2 -Wall

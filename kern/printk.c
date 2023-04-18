@@ -1,7 +1,5 @@
-#include <drivers/dev_cons.h>
 #include <print.h>
 #include <printk.h>
-#include <trap.h>
 
 void outputk(void *data, const char *buf, size_t len) {
 	for (int i = 0; i < len; i++) {
@@ -16,7 +14,7 @@ void printk(const char *fmt, ...) {
 	va_end(ap);
 }
 
-void print_tf(struct Trapframe *tf) {
+/* void print_tf(struct Trapframe *tf) {
 	for (int i = 0; i < sizeof(tf->regs) / sizeof(tf->regs[0]); i++) {
 		printk("$%2d = %08x\n", i, tf->regs[i]);
 	}
@@ -26,4 +24,4 @@ void print_tf(struct Trapframe *tf) {
 	printk("CP0.BadV  = %08x\n", tf->cp0_badvaddr);
 	printk("CP0.Cause = %08x\n", tf->cp0_cause);
 	printk("CP0.EPC   = %08x\n", tf->cp0_epc);
-}
+} */

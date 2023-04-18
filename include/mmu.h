@@ -92,9 +92,9 @@
  o
 */
 
-#define KERNBASE 0x80010000
+#define KERNBASE 0x80200000
 
-#define KSTACKTOP (ULIM + PDMAP)
+#define KSTACKTOP 0x80400000
 #define ULIM 0x80000000
 
 #define UVPT (ULIM - PDMAP)

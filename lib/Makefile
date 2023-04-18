@@ -1,6 +1,6 @@
 INCLUDES    := -I../include/
 
-targets     := elfloader.o print.o string.o
+targets     := print.o string.o
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
