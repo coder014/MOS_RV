@@ -1,17 +1,18 @@
-#include <env.h>
+// #include <env.h>
 #include <print.h>
 #include <printk.h>
+#include <console.h>
 
 void outputk(void *data, const char *buf, size_t len);
 
 void _panic(const char *file, int line, const char *func, const char *fmt, ...) {
-	u_long sp, ra, badva, sr, cause, epc;
-	// asm("move %0, $29" : "=r"(sp) :);
-	// asm("move %0, $31" : "=r"(ra) :);
-	// asm("mfc0 %0, $8" : "=r"(badva) :);
-	// asm("mfc0 %0, $12" : "=r"(sr) :);
-	// asm("mfc0 %0, $13" : "=r"(cause) :);
-	// asm("mfc0 %0, $14" : "=r"(epc) :);
+	u_long sp, ra, badva, status, cause, epc;
+	asm volatile("mv %0, x2" : "=r"(sp) );
+	asm volatile("mv %0, x1" : "=r"(ra) );
+	asm volatile("csrr %0, stval" : "=r"(badva) );
+	asm volatile("csrr %0, sstatus" : "=r"(status) );
+	asm volatile("csrr %0, scause" : "=r"(cause) );
+	asm volatile("csrr %0, sepc" : "=r"(epc) );
 
 	printk("panic at %s:%d (%s): ", file, line, func);
 
@@ -23,7 +24,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	printk("\n"
 	       "ra:    %08x  sp:  %08x  Status: %08x\n"
 	       "Cause: %08x  EPC: %08x  BadVA:  %08x\n",
-	       ra, sp, sr, cause, epc, badva);
+	       ra, sp, status, cause, epc, badva);
 
 #if defined(LAB) || LAB >= 3
 	extern struct Env envs[];

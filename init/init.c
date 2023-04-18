@@ -1,4 +1,7 @@
-// #include <printk.h>
+#include <types.h>
+#include <printk.h>
+#include <mmu.h>
+#include <console.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
@@ -7,7 +10,7 @@
 #else
 
 void rv32_init() {
-	//printk("init.c:\trv32_init() is called\n");
+	printk("init.c:\trv32_init() is called\n");
 
 	// lab2:
 	// mips_detect_memory();

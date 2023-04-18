@@ -1,5 +1,6 @@
 #include <print.h>
 #include <printk.h>
+#include <console.h>
 
 void outputk(void *data, const char *buf, size_t len) {
 	for (int i = 0; i < len; i++) {

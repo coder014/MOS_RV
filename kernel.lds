@@ -8,7 +8,7 @@ SECTIONS {
     . = KERNEL_ENTRY_ADDR;
     .text : {
         *(.text._start)
-        *(.text .text.*)
+        *(.text)
     }
     PROVIDE(etext = .);
 
@@ -18,7 +18,7 @@ SECTIONS {
     PROVIDE(edata = .);
 
     .bss  : {
-        *(.bss .bss* .sbss .sbss*)
+        *(.bss .bss.* .sbss .sbss.*)
     }
     PROVIDE(bss_end = .);
     . = KERNEL_END_ADDR;
