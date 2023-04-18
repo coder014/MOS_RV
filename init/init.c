@@ -11,6 +11,7 @@
 
 void rv32_init() {
 	printk("init.c:\trv32_init() is called\n");
+	panic("test panic here\n");
 
 	// lab2:
 	// mips_detect_memory();

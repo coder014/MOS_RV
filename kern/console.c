@@ -5,7 +5,7 @@ void printcharc(char ch) {
 }
 
 char scancharc(void) {
-	// return *((volatile char *)(KSEG1 + DEV_CONS_ADDRESS + DEV_CONS_PUTGETCHAR));
+	// not implemented yet
 	return '\0';
 }
 

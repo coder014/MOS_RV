@@ -30,10 +30,12 @@
 	.size function, .- function
 
 #define EXPORT(symbol)                                                                             \
+	.align 2;                                                                                    \
 	.globl symbol;                                                                             \
-	symbol:
+symbol:
 
 #define FEXPORT(symbol)                                                                            \
+	.align 2;                                                                                  \
 	.globl symbol;                                                                             \
 	.type symbol, @function;                                                                   \
-	symbol:
+symbol:

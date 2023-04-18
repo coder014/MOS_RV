@@ -1,14 +1,14 @@
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
-KERNEL_ENTRY_ADDR = 0x80200000;
-KERNEL_END_ADDR = 0x80400000;
+HIDDEN(KERNEL_ENTRY_ADDR = 0x80200000);
+HIDDEN(KERNEL_END_ADDR = 0x80600000);
 
 SECTIONS {
     . = KERNEL_ENTRY_ADDR;
     .text : {
-        *(.text._start)
-        *(.text)
+        *(.boot)
+        *(.text .text.*)
     }
     PROVIDE(etext = .);
 
