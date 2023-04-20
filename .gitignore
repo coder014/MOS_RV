@@ -5,6 +5,7 @@
 *.o
 *.objdump
 *.x
+*.orig
 *.swp
 *~
 tags

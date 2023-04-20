@@ -2,6 +2,7 @@
 #include <printk.h>
 #include <mmu.h>
 #include <console.h>
+#include <pmap.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
@@ -9,12 +10,11 @@
 #include <generated/init_override.h>
 #else
 
-void rv32_init() {
+void rv32_init(u_int hartid, u_int dtb) {
 	printk("init.c:\trv32_init() is called\n");
-	panic("test panic here\n");
 
 	// lab2:
-	// mips_detect_memory();
+	mips_detect_memory(dtb);
 	// mips_vm_init();
 	// page_init();
 
@@ -41,6 +41,7 @@ void rv32_init() {
 	// lab3:
 	// kclock_init();
 	// enable_irq();
+	panic("test panic here\n");
 	while (1) {
 	}
 }

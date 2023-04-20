@@ -26,7 +26,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	       "Cause: %08x  EPC: %08x  BadVA:  %08x\n",
 	       ra, sp, status, cause, epc, badva);
 
-#if defined(LAB) || LAB >= 3
+#if !defined(LAB) || LAB >= 3
 	extern struct Env envs[];
 	extern struct Env *curenv;
 	extern struct Pde *cur_pgdir;

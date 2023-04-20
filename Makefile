@@ -14,21 +14,21 @@ qemu_files            += $(mos_elf)
 
 lab-ge = $(shell [ "$$(echo $(lab)_ | cut -f1 -d_)" -ge $(1) ] && echo true)
 
-# ifeq ($(call lab-ge,3),true)
-# 	user_modules    += user/bare
-# endif
+ifeq ($(call lab-ge,3),true)
+	user_modules    += user/bare
+endif
 
-# ifeq ($(call lab-ge,4),true)
-# 	user_modules    += user
-# endif
+ifeq ($(call lab-ge,4),true)
+	user_modules    += user
+endif
 
-# ifeq ($(call lab-ge,5),true)
-# 	user_modules    += fs
-# 	targets         += fs-image
-# endif
+ifeq ($(call lab-ge,5),true)
+	user_modules    += fs
+	targets         += fs-image
+endif
 
 qemu_flags              += -machine virt -m 64M -nographic -no-reboot
-# CFLAGS                  += -DLAB=$(shell echo $(lab) | cut -f1 -d_)
+CFLAGS                  += -DLAB=$(shell echo $(lab) | cut -f1 -d_)
 
 objects                 := $(addsuffix /*.o, $(modules)) $(addsuffix /*.x, $(user_modules))
 modules                 += $(user_modules)
