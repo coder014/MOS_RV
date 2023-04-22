@@ -38,4 +38,6 @@
 #define t5 x30
 #define t6 x31
 
+#define sbadaddr stval
+
 #endif /* __ASM_RISCV_REGDEF_H */

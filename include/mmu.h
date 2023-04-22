@@ -9,39 +9,53 @@
 #define PDSHIFT 22 // log2(PDMAP)
 #define PDX(va) ((((u_long)(va)) >> 22) & 0x03FF)
 #define PTX(va) ((((u_long)(va)) >> 12) & 0x03FF)
-#define PTE_ADDR(pte) ((u_long)(pte) & ~0xFFF)
+#define PTE2PADDR(pte) (((u_long)(pte) << 2) & ~0xFFF)
+#define PTE_BITS(pte) ((u_long)(pte) & 0x3FF)
+#define PADDR2PTE(pa)                                                                     \
+	({                                                                                    \
+		u_long a = (u_long)(pa);                                                          \
+		if (a < KSEG0)                                                                    \
+			panic("PPN called with invalid pa %08lx", a);                                 \
+		(a >> 2) & ~0x3FF;                                                      \
+	})
 
 // Page number field of an address
-#define PPN(va) (((u_long)(va)) >> 12)
+#define PPN(pa)                                                                           \
+	({                                                                                    \
+		u_long a = (u_long)(pa);                                                          \
+		if (a < KSEG0)                                                                    \
+			panic("PPN called with invalid pa %08lx", a);                                 \
+		a >> 12;                                                                \
+	})
 #define VPN(va) (((u_long)(va)) >> 12)
 
 /* Page Table/Directory Entry flags */
 
 // Global bit. When the G bit in a TLB entry is set, that TLB entry will match solely on the VPN
 // field, regardless of whether the TLB entry’s ASID field matches the value in EntryHi.
-#define PTE_G 0x0100
+#define PTE_G 0x020
+#define PTE_U 0x010
 
 // Valid bit. If 0 any address matching this entry will cause a tlb miss exception (TLBL/TLBS).
-#define PTE_V 0x0200
+#define PTE_V 0x001
+#define PTE_R 0x002
+#define PTE_W 0x004
+#define PTE_X 0x008
 
 // Dirty bit, but really a write-enable bit. 1 to allow writes, 0 and any store using this
 // translation will cause a tlb mod exception (TLB Mod).
-#define PTE_D 0x0400
-
-// Uncacheable bit. 0 to make the access cacheable, 1 for uncacheable.
-#define PTE_N 0x0800
+#define PTE_D 0x080
+#define PTE_A 0x040
 
 // Copy On Write. Reserved for software, used by fork.
-#define PTE_COW 0x0001
+#define PTE_COW 0x100
 
 // Shared memmory. Reserved for software, used by fork.
-#define PTE_LIBRARY 0x0004
+#define PTE_LIBRARY 0x200
 
 // Memory segments (32-bit kernel mode addresses)
 #define KUSEG 0x00000000U
 #define KSEG0 0x80000000U
-#define KSEG1 0xA0000000U
-#define KSEG2 0xC0000000U
 
 /*
  * Part 2.  Our conventions.
@@ -49,19 +63,16 @@
 
 /*
  o     4G ----------->  +----------------------------+------------0x100000000
- o                      |       ...                  |  kseg2
- o      KSEG2    -----> +----------------------------+------------0xc000 0000
- o                      |          Devices           |  kseg1
- o      KSEG1    -----> +----------------------------+------------0xa000 0000
- o                      |      Invalid Memory        |   /|\
+ o                      |       ...                  |   /|\
+ o                      |                            |    |
  o                      +----------------------------+----|-------Physical Memory Max
  o                      |       ...                  |  kseg0
- o      KSTACKTOP-----> +----------------------------+----|-------0x8040 0000-------end
- o                      |       Kernel Stack         |    | KSTKSIZE            /|\
- o                      +----------------------------+----|------                |
- o                      |       Kernel Text          |    |                    PDMAP
- o      KERNBASE -----> +----------------------------+----|-------0x8001 0000    |
- o                      |      Exception Entry       |   \|/                    \|/
+ o      KSTACKTOP-----> +----------------------------+----|-------0x8060 0000-------end
+ o                      |       Kernel Stack         |    | KSTKSIZE         
+ o                      +----------------------------+----|------        
+ o                      |       Kernel Text          |    |          
+ o      KERNBASE -----> +----------------------------+----|-------0x8020 0000
+ o                      |         SBI Text           |   \|/                    
  o      ULIM     -----> +----------------------------+------------0x8000 0000-------
  o                      |         User VPT           |     PDMAP                /|\
  o      UVPT     -----> +----------------------------+------------0x7fc0 0000    |
@@ -121,24 +132,6 @@ extern u_long npage;
 
 typedef u_long Pde;
 typedef u_long Pte;
-
-#define PADDR(kva)                                                                                 \
-	({                                                                                         \
-		u_long a = (u_long)(kva);                                                          \
-		if (a < ULIM)                                                                      \
-			panic("PADDR called with invalid kva %08lx", a);                           \
-		a - ULIM;                                                                          \
-	})
-
-// translates from physical address to kernel virtual address
-#define KADDR(pa)                                                                                  \
-	({                                                                                         \
-		u_long ppn = PPN(pa);                                                              \
-		if (ppn >= npage) {                                                                \
-			panic("KADDR called with invalid pa %08lx", (u_long)pa);                   \
-		}                                                                                  \
-		(pa) + ULIM;                                                                       \
-	})
 
 #define assert(x)                                                                                  \
 	do {                                                                                       \

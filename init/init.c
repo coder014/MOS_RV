@@ -10,13 +10,13 @@
 #include <generated/init_override.h>
 #else
 
-void rv32_init(u_int hartid, u_int dtb) {
+void rv32_init(u_int hartid, u_int dtb) { // two args from previous hart
 	printk("init.c:\trv32_init() is called\n");
 
 	// lab2:
-	mips_detect_memory(dtb);
-	// mips_vm_init();
-	// page_init();
+	riscv_detect_memory(dtb);
+	riscv_vm_init();
+	page_init();
 
 	// lab3:
 	// env_init();

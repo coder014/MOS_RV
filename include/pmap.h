@@ -25,8 +25,10 @@ struct Page {
 extern struct Page *pages;
 extern struct Page_list page_free_list;
 
+#define PPNOFFSET 0x80000
+
 static inline u_long page2ppn(struct Page *pp) {
-	return pp - pages;
+	return (pp - pages) + PPNOFFSET;
 }
 
 static inline u_long page2pa(struct Page *pp) {
@@ -34,15 +36,13 @@ static inline u_long page2pa(struct Page *pp) {
 }
 
 static inline struct Page *pa2page(u_long pa) {
-	if (PPN(pa) >= npage) {
+	if ((PPN(pa)-PPNOFFSET) >= npage) {
 		panic("pa2page called with invalid pa: %x", pa);
 	}
-	return &pages[PPN(pa)];
+	return &pages[PPN(pa) - PPNOFFSET];
 }
 
-static inline u_long page2kva(struct Page *pp) {
-	return KADDR(page2pa(pp));
-}
+#define page2kva page2pa
 
 static inline u_long va2pa(Pde *pgdir, u_long va) {
 	Pte *p;
@@ -51,16 +51,16 @@ static inline u_long va2pa(Pde *pgdir, u_long va) {
 	if (!(*pgdir & PTE_V)) {
 		return ~0;
 	}
-	p = (Pte *)KADDR(PTE_ADDR(*pgdir));
+	p = (Pte *)PTE2PADDR(*pgdir);
 	if (!(p[PTX(va)] & PTE_V)) {
 		return ~0;
 	}
-	return PTE_ADDR(p[PTX(va)]);
+	return PTE2PADDR(p[PTX(va)]);
 }
 
-void mips_detect_memory(u_int);
-void mips_vm_init(void);
-void mips_init(void);
+void riscv_detect_memory(u_int);
+void riscv_vm_init(void);
+void riscv_init(void);
 void page_init(void);
 void *alloc(u_int n, u_int align, int clear);
 
@@ -70,9 +70,11 @@ void page_decref(struct Page *pp);
 int page_insert(Pde *pgdir, u_int asid, struct Page *pp, u_long va, u_int perm);
 struct Page *page_lookup(Pde *pgdir, u_long va, Pte **ppte);
 void page_remove(Pde *pgdir, u_int asid, u_long va);
-void tlb_invalidate(u_int asid, u_long va);
-
-void physical_memory_manage_check(void);
-void page_check(void);
+/* Overview:
+ *   Invalidate the TLB entry with specified 'asid' and virtual address 'va'.
+ */
+#define tlb_invalidate() do {                   \
+	asm volatile("sfence.vma" ::: "memory");    \
+} while (0)
 
 #endif /* _PMAP_H_ */

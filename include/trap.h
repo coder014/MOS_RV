@@ -10,12 +10,10 @@ struct Trapframe {
 	unsigned long regs[32];
 
 	/* Saved special registers. */
-	unsigned long cp0_status;
-	unsigned long hi;
-	unsigned long lo;
-	unsigned long cp0_badvaddr;
-	unsigned long cp0_cause;
-	unsigned long cp0_epc;
+	unsigned long status;
+	unsigned long badvaddr;
+	unsigned long cause;
+	unsigned long epc;
 };
 
 void print_tf(struct Trapframe *tf);
@@ -63,11 +61,7 @@ void print_tf(struct Trapframe *tf);
 #define TF_REG31 ((TF_REG30) + 4)
 
 #define TF_STATUS ((TF_REG31) + 4)
-
-#define TF_HI ((TF_STATUS) + 4)
-#define TF_LO ((TF_HI) + 4)
-
-#define TF_BADVADDR ((TF_LO) + 4)
+#define TF_BADVADDR ((TF_STATUS) + 4)
 #define TF_CAUSE ((TF_BADVADDR) + 4)
 #define TF_EPC ((TF_CAUSE) + 4)
 /*
