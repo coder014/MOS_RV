@@ -5,6 +5,7 @@
 /* These variables are set by mips_detect_memory() */
 static u_long memsize; /* Maximum physical address */
 u_long npage;	       /* Amount of memory(in pages) */
+u_long *kbasepgdir;
 
 struct Page *pages;
 static u_long freemem;
@@ -73,8 +74,15 @@ void riscv_vm_init() {
 	 * physical address `pages` allocated before. For consideration of alignment,
 	 * you should round up the memory size before map. */
 	pages = (struct Page *)alloc(npage * sizeof(struct Page), BY2PG, 1);
-	printk("to memory %x for struct Pages.\n", freemem);
-	printk("pmap.c:\t mips vm init success\n");
+	printk("to memory %x for struct Pages and kernelbase pagedir.\n", freemem);
+	kbasepgdir = (u_long *)alloc(BY2PG, BY2PG, 1);
+	for(u_long i = KSEG0; i < KSEG0 + memsize; i+=PDMAP) {
+		kbasepgdir[PDX(i)] = PADDR2PTE(i) | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X | PTE_V;
+		//printk("kbasepgdir[%d] = %08lx\n", PDX(i), kbasepgdir[PDX(i)]);
+	}
+	u_int atp = 0x80000000U | PPN(kbasepgdir);
+	asm volatile("csrw satp, %0\nnop" :: "r"(atp) : "memory");
+	printk("pmap.c:\t risc-v vm init success, now in virtual address mode.\n");
 }
 
 /* Overview:
@@ -225,8 +233,8 @@ int page_insert(Pde *pgdir, u_int asid, struct Page *pp, u_long va, u_int perm) 
 		if (pa2page(PTE2PADDR(*pte)) != pp) {
 			page_remove(pgdir, asid, va);
 		} else {
-			*pte = ((*pte) & ~0x3FF) | perm | PTE_A | PTE_D | PTE_V;
-			tlb_invalidate();
+			*pte = ((*pte) & ~0x3FF) | perm | PTE_A | PTE_D | PTE_R | PTE_V;
+			tlb_invalidate(asid, va);
 			return 0;
 		}
 	}
@@ -240,8 +248,8 @@ int page_insert(Pde *pgdir, u_int asid, struct Page *pp, u_long va, u_int perm) 
 	 * 'pp_ref'. */
 	/* Exercise 2.7: Your code here. (3/3) */
 	++pp->pp_ref;
-	*pte = PADDR2PTE(page2pa(pp)) | perm | PTE_A | PTE_D | PTE_V;
-	tlb_invalidate();
+	*pte = PADDR2PTE(page2pa(pp)) | perm | PTE_A | PTE_D | PTE_R | PTE_V;
+	tlb_invalidate(asid, va);
 
 	return 0;
 }
@@ -302,6 +310,6 @@ void page_remove(Pde *pgdir, u_int asid, u_long va) {
 
 	/* Step 3: Flush TLB. */
 	*pte = 0;
-	tlb_invalidate();
+	tlb_invalidate(asid, va);
 	return;
 }
