@@ -3,6 +3,8 @@
 #include <mmu.h>
 #include <console.h>
 #include <pmap.h>
+#include <trap.h>
+#include <kclock.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
@@ -39,9 +41,9 @@ void rv32_init(u_int hartid, u_int dtb) { // two args from previous hart
 	// ENV_CREATE(user_devtst);
 
 	// lab3:
-	// kclock_init();
-	// enable_irq();
-	panic("test panic here\n");
+	kclock_init();
+	idt_init();
+	// panic("test panic here\n");
 	while (1) {
 	}
 }

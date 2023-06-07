@@ -16,7 +16,9 @@ struct Trapframe {
 	unsigned long epc;
 };
 
+void idt_init(void);
 void print_tf(struct Trapframe *tf);
+void traps_dispatch(struct Trapframe *tf);
 
 #endif /* !__ASSEMBLER__ */
 
@@ -50,9 +52,6 @@ void print_tf(struct Trapframe *tf);
 #define TF_REG23 ((TF_REG22) + 4)
 #define TF_REG24 ((TF_REG23) + 4)
 #define TF_REG25 ((TF_REG24) + 4)
-/*
- * $26 (k0) and $27 (k1) not saved
- */
 #define TF_REG26 ((TF_REG25) + 4)
 #define TF_REG27 ((TF_REG26) + 4)
 #define TF_REG28 ((TF_REG27) + 4)

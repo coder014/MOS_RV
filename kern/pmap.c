@@ -1,6 +1,7 @@
 #include <pmap.h>
 #include <printk.h>
 #include <fdt.h>
+#include <riscv.h>
 
 /* These variables are set by mips_detect_memory() */
 static u_long memsize; /* Maximum physical address */
@@ -81,7 +82,7 @@ void riscv_vm_init() {
 		//printk("kbasepgdir[%d] = %08lx\n", PDX(i), kbasepgdir[PDX(i)]);
 	}
 	u_int atp = 0x80000000U | PPN(kbasepgdir);
-	asm volatile("csrw satp, %0\nnop" :: "r"(atp) : "memory");
+	write_csr(satp, atp);
 	printk("pmap.c:\t risc-v vm init success, now in virtual address mode.\n");
 }
 

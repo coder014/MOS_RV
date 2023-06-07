@@ -15,7 +15,7 @@ qemu_files            += $(mos_elf)
 lab-ge = $(shell [ "$$(echo $(lab)_ | cut -f1 -d_)" -ge $(1) ] && echo true)
 
 ifeq ($(call lab-ge,3),true)
-	user_modules    += user/bare
+#	user_modules    += user/bare
 endif
 
 ifeq ($(call lab-ge,4),true)

@@ -29,27 +29,27 @@
 #include <types.h>
 
 /* Type for a 16-bit quantity.  */
-typedef uint16_t Elf32_Half;
+typedef u_short Elf32_Half;
 
 /* Types for signed and unsigned 32-bit quantities.  */
-typedef uint32_t Elf32_Word;
-typedef int32_t Elf32_Sword;
+typedef u_int Elf32_Word;
+typedef int Elf32_Sword;
 
 /* Types for signed and unsigned 64-bit quantities.  */
-typedef uint64_t Elf32_Xword;
-typedef int64_t Elf32_Sxword;
+// typedef uint64_t Elf32_Xword;
+// typedef int64_t Elf32_Sxword;
 
 /* Type of addresses.  */
-typedef uint32_t Elf32_Addr;
+typedef u_int Elf32_Addr;
 
 /* Type of file offsets.  */
-typedef uint32_t Elf32_Off;
+typedef u_int Elf32_Off;
 
 /* Type for section indices, which are 16-bit quantities.  */
-typedef uint16_t Elf32_Section;
+typedef u_short Elf32_Section;
 
 /* Type of symbol indices.  */
-typedef uint32_t Elf32_Symndx;
+typedef u_int Elf32_Symndx;
 
 /* The ELF file header.  This appears at the start of every ELF file.  */
 

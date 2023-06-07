@@ -7,7 +7,7 @@
 	bltz    sp, 1f
 	li      sp, KSTACKTOP
 1:
-	subi    sp, sp, TF_SIZE
+	addi    sp, sp, -TF_SIZE
 	sw      x0, TF_REG0(sp)
 	sw      x1, TF_REG1(sp)
 	sw      x3, TF_REG3(sp)
@@ -51,7 +51,7 @@
 	sw      t0, TF_BADVADDR(sp)
 .endm
 
-.macro RESTORE_SOME
+.macro RESTORE_ALL
 	lw      t0, TF_STATUS(sp)
 	lw      t1, TF_EPC(sp)
 	csrw    sstatus, t0

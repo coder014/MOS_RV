@@ -1,0 +1,18 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 4            # 每级缩进的空格数
+UseTab: Always            # 使用Tab符号进行缩进
+TabWidth: 4               # Tab符号的宽度
+
+# 大括号选项
+BreakBeforeBraces: Linux
+
+ColumnLimit: 100                 # 每行的字符限制
+SpacesBeforeTrailingComments: 1  # 注释与代码之间的空格数
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+IndentCaseLabels:	true

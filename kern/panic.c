@@ -1,4 +1,4 @@
-// #include <env.h>
+#include <env.h>
 #include <print.h>
 #include <printk.h>
 #include <console.h>
@@ -27,7 +27,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	       ra, sp, status, cause, epc, badva);
 
 #if !defined(LAB) || LAB >= 3
-	extern struct Env envs[];
+	/* extern struct Env envs[];
 	extern struct Env *curenv;
 	extern struct Pde *cur_pgdir;
 
@@ -46,7 +46,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 		printk("cur_pgdir: %x (invalid)\n", cur_pgdir);
 	} else {
 		printk("cur_pgdir: NULL\n", cur_pgdir);
-	}
+	} */
 #endif
 
 #ifdef MOS_HANG_ON_PANIC
