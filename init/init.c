@@ -5,6 +5,7 @@
 #include <pmap.h>
 #include <trap.h>
 #include <kclock.h>
+#include <env.h>
 
 // When build with 'make test lab=?_?', we will replace your 'mips_init' with a generated one from
 // 'tests/lab?_?'.
@@ -21,7 +22,7 @@ void rv32_init(u_int hartid, u_int dtb) { // two args from previous hart
 	page_init();
 
 	// lab3:
-	// env_init();
+	env_init();
 
 	// lab3:
 	// ENV_CREATE_PRIORITY(user_bare_loop, 1);

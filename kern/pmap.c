@@ -6,7 +6,8 @@
 /* These variables are set by mips_detect_memory() */
 static u_long memsize; /* Maximum physical address */
 u_long npage;	       /* Amount of memory(in pages) */
-u_long *kbasepgdir;
+Pde *kbasepgdir;
+Pde *cur_pgdir;
 
 struct Page *pages;
 static u_long freemem;
@@ -83,6 +84,7 @@ void riscv_vm_init() {
 	}
 	u_int atp = 0x80000000U | PPN(kbasepgdir);
 	write_csr(satp, atp);
+	set_csr(sstatus, SSTATUS_SUM);
 	printk("pmap.c:\t risc-v vm init success, now in virtual address mode.\n");
 }
 
@@ -226,6 +228,8 @@ int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
  */
 int page_insert(Pde *pgdir, u_int asid, struct Page *pp, u_long va, u_int perm) {
 	Pte *pte;
+
+	if(va >= ULIM) panic("trying to map the kernel space, asid = %u\n", asid);
 
 	/* Step 1: Get corresponding page table entry. */
 	pgdir_walk(pgdir, va, 0, &pte);

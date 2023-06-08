@@ -7,6 +7,7 @@
 #include <types.h>
 
 extern Pde *cur_pgdir;
+extern Pde *kbasepgdir;
 
 LIST_HEAD(Page_list, Page);
 typedef LIST_ENTRY(Page) Page_LIST_entry_t;

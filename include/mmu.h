@@ -133,6 +133,24 @@ extern u_long npage;
 typedef u_long Pde;
 typedef u_long Pte;
 
+#define PADDR(kva)                                                                           \
+	({                                                                                         \
+		u_long a = (u_long)(kva);                                                          \
+		if (a < ULIM)                                                                      \
+			panic("PADDR called with invalid kva %08lx", a);                           \
+		a;                                                                          \
+	})
+
+// translates from physical address to kernel virtual address
+#define KADDR(pa)                                                                              \
+	({                                                                                         \
+		u_long ppn = PPN(pa) - PPNOFFSET;                                                              \
+		if (ppn >= npage) {                                                                \
+			panic("KADDR called with invalid pa %08lx", (u_long)(pa));                   \
+		}                                                                                  \
+		(pa);                                                                       \
+	})
+
 #define assert(x)                                                                                  \
 	do {                                                                                       \
 		if (!(x)) {                                                                        \

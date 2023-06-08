@@ -2,6 +2,7 @@
 #include <riscv.h>
 #include <printk.h>
 #include <kclock.h>
+#include <sched.h>
 
 void idt_init()
 {
@@ -17,7 +18,8 @@ static void interrupt_handler(struct Trapframe *tf)
 	switch (cause) {
 		case IRQ_S_TIMER:
 			clock_set_next_event();
-			printk("timer intr!\n");
+			//printk("timer intr!\n");
+			schedule(0);
 			break;
 		default:
 			panic("unhandled intr: %d\n", cause);

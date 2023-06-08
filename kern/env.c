@@ -183,9 +183,10 @@ void env_init(void) {
 
 	base_pgdir = (Pde *)page2kva(p);
 	map_segment(base_pgdir, 0, PADDR(pages), UPAGES, ROUND(npage * sizeof(struct Page), BY2PG),
-		    PTE_G);
+		    PTE_G | PTE_U);
 	map_segment(base_pgdir, 0, PADDR(envs), UENVS, ROUND(NENV * sizeof(struct Env), BY2PG),
-		    PTE_G);
+		    PTE_G | PTE_U);
+	memcpy(base_pgdir + PDX(KSEG0), kbasepgdir + PDX(KSEG0), sizeof(Pde) * (npage / 1024));
 }
 
 /* Overview:
@@ -212,10 +213,12 @@ static int env_setup_vm(struct Env *e) {
 	 */
 	memcpy(e->env_pgdir + PDX(UTOP), base_pgdir + PDX(UTOP),
 	       sizeof(Pde) * (PDX(UVPT) - PDX(UTOP)));
+	memcpy(e->env_pgdir + PDX(KSEG0), base_pgdir + PDX(KSEG0),
+	       sizeof(Pde) * (npage / 1024));
 
 	/* Step 3: Map its own page table at 'UVPT' with readonly permission.
 	 * As a result, user programs can read its page table through 'UVPT' */
-	e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_V;
+	// e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_V;
 	return 0;
 }
 
@@ -273,7 +276,7 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	// Timer interrupt (STATUS_IM4) will be enabled.
 	// e->env_tf.cp0_status = STATUS_IM4 | STATUS_KUp | STATUS_IEp;
 	// Keep space for 'argc' and 'argv'.
-	e->env_tf.regs[29] = USTACKTOP - sizeof(int) - sizeof(char **);
+	e->env_tf.regs[2] = USTACKTOP - sizeof(int) - sizeof(char **);
 
 	/* Step 5: Remove the new Env from env_free_list. */
 	/* Exercise 3.4: Your code here. (4/4) */
@@ -299,7 +302,6 @@ static int load_icode_mapper(void *data, u_long va, size_t offset, u_int perm, c
 			     size_t len) {
 	struct Env *env = (struct Env *)data;
 	struct Page *p;
-	int r;
 
 	/* Step 1: Allocate a page with 'page_alloc'. */
 	/* Exercise 3.5: Your code here. (1/2) */
@@ -314,7 +316,7 @@ static int load_icode_mapper(void *data, u_long va, size_t offset, u_int perm, c
 	}
 
 	/* Step 3: Insert 'p' into 'env->env_pgdir' at 'va' with 'perm'. */
-	return page_insert(env->env_pgdir, env->env_asid, p, va, perm);
+	return page_insert(env->env_pgdir, env->env_asid, p, va, perm | PTE_U);
 }
 
 /* Overview:
@@ -393,7 +395,7 @@ void env_free(struct Env *e) {
 			continue;
 		}
 		/* Hint: find the pa and va of the page table. */
-		pa = PTE_ADDR(e->env_pgdir[pdeno]);
+		pa = PTE2PADDR(e->env_pgdir[pdeno]);
 		pt = (Pte *)KADDR(pa);
 		/* Hint: Unmap all PTEs in this page table. */
 		for (pteno = 0; pteno <= PTX(~0); pteno++) {
@@ -406,14 +408,14 @@ void env_free(struct Env *e) {
 		e->env_pgdir[pdeno] = 0;
 		page_decref(pa2page(pa));
 		/* Hint: invalidate page table in TLB */
-		tlb_invalidate(e->env_asid, UVPT + (pdeno << PGSHIFT));
+		//tlb_invalidate(e->env_asid, UVPT + (pdeno << PGSHIFT));
 	}
 	/* Hint: free the page directory. */
 	page_decref(pa2page(PADDR(e->env_pgdir)));
 	/* Hint: free the ASID */
 	asid_free(e->env_asid);
 	/* Hint: invalidate page directory in TLB */
-	tlb_invalidate(e->env_asid, UVPT + (PDX(UVPT) << PGSHIFT));
+	tlb_invalidate(e->env_asid, 0);
 	/* Hint: return the environment to the free list. */
 	e->env_status = ENV_FREE;
 	LIST_INSERT_HEAD((&env_free_list), (e), env_link);
@@ -460,7 +462,7 @@ static inline void pre_env_run(struct Env *e) {
 #endif
 }
 
-extern void env_pop_tf(struct Trapframe *tf, u_int asid) __attribute__((noreturn));
+extern void env_pop_tf(struct Trapframe *tf, u_int asid, u_int ppn_pgdir) __attribute__((noreturn));
 
 /* Overview:
  *   Switch CPU context to the specified env 'e'.
@@ -501,7 +503,7 @@ void env_run(struct Env *e) {
 	 *    returning to the kernel caller, making 'env_run' a 'noreturn' function as well.
 	 */
 	/* Exercise 3.8: Your code here. (2/2) */
-	env_pop_tf(&curenv->env_tf, curenv->env_asid);
+	env_pop_tf(&curenv->env_tf, curenv->env_asid, PPN(cur_pgdir));
 
 }
 
@@ -556,7 +558,7 @@ void env_check() {
 	assert(pe2->env_pgdir[PDX(UTOP) - 1] == 0);
 	printk("env_setup_vm passed!\n");
 
-	printk("pe2`s sp register %x\n", pe2->env_tf.regs[29]);
+	printk("pe2`s sp register %x\n", pe2->env_tf.regs[2]);
 
 	/* free all env allocated in this function */
 	TAILQ_INSERT_TAIL(&env_sched_list, pe0, env_sched_link);
