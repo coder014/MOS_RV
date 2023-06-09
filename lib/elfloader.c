@@ -27,9 +27,10 @@ int elf_load_seg(Elf32_Phdr *ph, const void *bin, elf_mapper_t map_page, void *d
 	size_t bin_size = ph->p_filesz;
 	size_t sgsize = ph->p_memsz;
 	u_int perm = PTE_V;
-	if (ph->p_flags & PF_W) {
+	if (ph->p_flags & PF_W)
 		perm |= PTE_W;
-	}
+	if (ph->p_flags & PF_X)
+		perm |= PTE_X;
 
 	int r;
 	size_t i;

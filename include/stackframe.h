@@ -52,9 +52,9 @@
 .endm
 
 .macro RESTORE_ALL
-	lw      t0, TF_STATUS(sp)
+	// lw      t0, TF_STATUS(sp)
 	lw      t1, TF_EPC(sp)
-	csrw    sstatus, t0
+	// csrw    sstatus, t0
 	csrw    sepc, t1
 	lw      x31, TF_REG31(sp)
 	lw      x30, TF_REG30(sp)

@@ -17,8 +17,7 @@ struct Trapframe {
 };
 
 void idt_init(void);
-void print_tf(struct Trapframe *tf);
-void traps_dispatch(struct Trapframe *tf);
+// void print_tf(struct Trapframe *tf);
 
 #endif /* !__ASSEMBLER__ */
 

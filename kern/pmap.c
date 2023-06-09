@@ -318,3 +318,39 @@ void page_remove(Pde *pgdir, u_int asid, u_long va) {
 	tlb_invalidate(asid, va);
 	return;
 }
+
+static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
+	struct Page *p = NULL;
+
+	if (va < UTEMP) {
+		panic("address too low");
+	}
+
+	if (va >= USTACKTOP && va < USTACKTOP + BY2PG) {
+		panic("invalid memory");
+	}
+
+	if (va >= UENVS && va < UPAGES) {
+		panic("envs zone");
+	}
+
+	if (va >= UPAGES && va < UVPT) {
+		panic("pages zone");
+	}
+
+	if (va >= ULIM) {
+		panic("kernel address");
+	}
+
+	panic_on(page_alloc(&p));
+	panic_on(page_insert(pgdir, asid, p, va, PTE_W | PTE_U));
+}
+
+void _do_tlb_refill(u_long va, u_int asid) {
+	Pte *pte;
+	struct Page *pp = page_lookup(cur_pgdir, va, &pte);
+	if (pp == NULL) {
+		passive_alloc(va, cur_pgdir, asid);
+		// page_lookup(cur_pgdir, va, &pte);
+	}
+}

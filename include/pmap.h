@@ -74,6 +74,7 @@ void page_remove(Pde *pgdir, u_int asid, u_long va);
 /* Overview:
  *   Invalidate the TLB entry with specified 'asid' and virtual address 'va'.
  */
+void _do_tlb_refill(u_long va, u_int asid);
 #define tlb_invalidate(asid, va) asm volatile("sfence.vma %0, %1" :: "r"(va), "r"(asid) : "memory")
 
 #endif /* _PMAP_H_ */

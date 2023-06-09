@@ -2,6 +2,7 @@
 #include <env.h>
 #include <mmu.h>
 #include <pmap.h>
+#include <console.h>
 #include <printk.h>
 #include <sched.h>
 
@@ -347,7 +348,7 @@ static void load_icode(struct Env *e, const void *binary, size_t size) {
 
 	/* Step 3: Set 'e->env_tf.cp0_epc' to 'ehdr->e_entry'. */
 	/* Exercise 3.6: Your code here. */
-	// e->env_tf.cp0_epc=ehdr->e_entry;
+	e->env_tf.epc = ehdr->e_entry;
 }
 
 /* Overview:
@@ -452,10 +453,10 @@ static inline void pre_env_run(struct Env *e) {
 #endif
 #ifdef MOS_SCHED_END_PC
 	struct Trapframe *tf = (struct Trapframe *)KSTACKTOP - 1;
-	u_int epc = tf->cp0_epc;
+	u_int epc = tf->epc;
 	if (epc == MOS_SCHED_END_PC) {
-		printk("env %08x reached end pc: 0x%08x, $v0=0x%08x\n", e->env_id, epc,
-		       tf->regs[2]);
+		printk("env %08x reached end pc: 0x%08x, $a0=0x%08x\n", e->env_id, epc,
+		       tf->regs[10]);
 		env_destroy(e);
 		schedule(0);
 	}

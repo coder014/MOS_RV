@@ -16,6 +16,20 @@
 #define IRQ_COP      12
 #define IRQ_HOST     13
 
+#define CAUSE_MISALIGNED_FETCH 0x0
+#define CAUSE_ACCESS_FETCH 0x1
+#define CAUSE_ILLEGAL_INSTRUCTION 0x2
+#define CAUSE_BREAKPOINT 0x3
+#define CAUSE_MISALIGNED_LOAD 0x4
+#define CAUSE_ACCESS_LOAD 0x5
+#define CAUSE_MISALIGNED_STORE 0x6
+#define CAUSE_ACCESS_STORE 0x7
+#define CAUSE_USER_ECALL 0x8
+#define CAUSE_SUPERVISOR_ECALL 0x9
+#define CAUSE_FAULT_FETCH 0xc
+#define CAUSE_FAULT_LOAD 0xd
+#define CAUSE_FAULT_STORE 0xf
+
 #define MIP_SSIP            (1 << IRQ_S_SOFT)
 #define MIP_STIP            (1 << IRQ_S_TIMER)
 #define MIP_SEIP            (1 << IRQ_S_EXT)

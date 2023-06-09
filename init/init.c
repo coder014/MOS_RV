@@ -44,9 +44,9 @@ void rv32_init(u_int hartid, u_int dtb) { // two args from previous hart
 	// lab3:
 	kclock_init();
 	idt_init();
-	// panic("test panic here\n");
 	while (1) {
 	}
+	panic("init.c:\tend of rv32_init() reached!");
 }
 
 #endif
