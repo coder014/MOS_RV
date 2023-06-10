@@ -5,8 +5,7 @@ void printcharc(char ch) {
 }
 
 char scancharc(void) {
-	// not implemented yet
-	return '\0';
+	return sbi_call(SBI_CONSOLE_GETCHAR, 0, 0, 0).value;
 }
 
 void halt(void) {

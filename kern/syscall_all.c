@@ -430,6 +430,7 @@ int sys_cgetc(void) {
 	int ch;
 	while ((ch = scancharc()) == 0) {
 	}
+	if (ch == -1) panic("read console error!");
 	return ch;
 }
 

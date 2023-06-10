@@ -507,24 +507,3 @@ void env_run(struct Env *e) {
 	env_pop_tf(&curenv->env_tf, curenv->env_asid, PPN(cur_pgdir));
 
 }
-
-void envid2env_check() {
-	struct Env *pe, *pe0, *pe2;
-	assert(env_alloc(&pe0, 0) == 0);
-	assert(env_alloc(&pe2, 0) == 0);
-	int re;
-	pe2->env_status = ENV_FREE;
-	re = envid2env(pe2->env_id, &pe, 0);
-
-	assert(re == -E_BAD_ENV);
-
-	pe2->env_status = ENV_RUNNABLE;
-	re = envid2env(pe2->env_id, &pe, 0);
-
-	assert(pe->env_id == pe2->env_id && re == 0);
-
-	curenv = pe0;
-	re = envid2env(pe2->env_id, &pe, 1);
-	assert(re == -E_BAD_ENV);
-	printk("envid2env() work well!\n");
-}

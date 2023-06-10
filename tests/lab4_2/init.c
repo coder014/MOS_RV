@@ -1,8 +1,7 @@
-void mips_init() {
-	printk("init.c:\tmips_init() is called\n");
-
-	mips_detect_memory();
-	mips_vm_init();
+void rv32_init(u_int hartid, u_int dtb) {
+	printk("init.c:\trv32_init() is called\n");
+	riscv_detect_memory(dtb);
+	riscv_vm_init();
 	page_init();
 	env_init();
 
@@ -11,8 +10,8 @@ void mips_init() {
 	ppc->env_parent_id = ppb->env_id;
 
 	kclock_init();
-	enable_irq();
+	idt_init();
 	while (1) {
 	}
-	panic("init.c:\tend of mips_init() reached!");
+	panic("init.c:\tend of rv32_init() reached!");
 }

@@ -5,6 +5,7 @@
 #include <pmap.h>
 #include <mmu.h>
 #include <sched.h>
+#include <syscall.h>
 
 void idt_init()
 {
@@ -42,6 +43,10 @@ static void normal_page_fault(struct Trapframe *tf)
 static void exception_handler(struct Trapframe *tf)
 {
 	switch (tf->cause) {
+		case CAUSE_USER_ECALL:
+			do_syscall(tf);
+			break;
+		case CAUSE_FAULT_LOAD:
 		case CAUSE_FAULT_STORE:
 			normal_page_fault(tf);
 			break;

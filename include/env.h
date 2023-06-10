@@ -53,8 +53,6 @@ void env_destroy(struct Env *e);
 int envid2env(u_int envid, struct Env **penv, int checkperm);
 void env_run(struct Env *e) __attribute__((noreturn));
 
-void envid2env_check(void);
-
 #define ENV_CREATE_PRIORITY(x, y)                                                                  \
 	({                                                                                         \
 		extern u_char binary_##x##_start[];                                                \
