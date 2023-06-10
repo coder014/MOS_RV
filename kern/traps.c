@@ -1,4 +1,5 @@
 #include <trap.h>
+#include <env.h>
 #include <riscv.h>
 #include <printk.h>
 #include <kclock.h>
@@ -35,7 +36,7 @@ static void interrupt_handler(struct Trapframe *tf)
 static void normal_page_fault(struct Trapframe *tf)
 {
 	u_int tmp = tf->status;
-	assert(!(tmp & SSTATUS_SPP));
+	// assert(!(tmp & SSTATUS_SPP));
 	tmp = read_csr(satp);
 	_do_tlb_refill(tf->badvaddr, (tmp & 0x7FFFFFFF) >> 22);
 }
@@ -59,8 +60,29 @@ static void query_vpt(struct Trapframe *tf)
 	tf->epc += 4;
 }
 
+static void user_mod(struct Trapframe *tf) {
+	struct Trapframe tmp_tf = *tf;
+
+	if (tf->regs[2] < USTACKTOP || tf->regs[2] >= UXSTACKTOP) {
+		tf->regs[2] = UXSTACKTOP;
+	}
+	tf->regs[2] -= sizeof(struct Trapframe);
+	*(struct Trapframe *)tf->regs[2] = tmp_tf;
+
+	if (curenv->env_user_tlb_mod_entry) {
+		tf->regs[10] = tf->regs[2];
+		// Hint: Set 'cp0_epc' in the context 'tf' to 'curenv->env_user_tlb_mod_entry'.
+		/* Exercise 4.11: Your code here. */
+		tf->epc = curenv->env_user_tlb_mod_entry;
+	} else {
+		panic("TLB Mod but no user handler registered");
+	}
+}
+
+
 static void exception_handler(struct Trapframe *tf)
 {
+	Pte *tmp;
 	switch (tf->cause) {
 		case CAUSE_FAULT_FETCH:
 			panic("unknown instr at %08x : %08x", tf->epc, *(u_int*)tf->epc);
@@ -73,7 +95,9 @@ static void exception_handler(struct Trapframe *tf)
 			else normal_page_fault(tf);
 			break;
 		case CAUSE_FAULT_STORE:
-			normal_page_fault(tf);
+			pgdir_walk(cur_pgdir, tf->badvaddr, 0, &tmp);
+			if (tmp && (*tmp & PTE_V) && !(*tmp & PTE_W)) user_mod(tf);
+			else normal_page_fault(tf);
 			break;
 		default:
 			panic("unhandled exception: %d\n", tf->cause);

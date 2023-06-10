@@ -28,7 +28,7 @@ void srv(u_int pvt) {
 
 	int i;
 	u_int *buf = (u_int *)0x60000000;
-	syscall_mem_alloc(0, buf, PTE_D);
+	syscall_mem_alloc(0, buf, PTE_W);
 	for (i = 0; i < (tot >> 1); ++i) {
 		u_int who = 0;
 		u_int v = ipc_recv(&who, 0, 0);
@@ -105,7 +105,7 @@ int fork_n(int n) {
 }
 
 int main() {
-	syscall_mem_alloc(0, (void *)timer, PTE_D | PTE_LIBRARY);
+	syscall_mem_alloc(0, (void *)timer, PTE_W | PTE_LIBRARY);
 	*timer = 0;
 	if (fork_n(2)) {
 		sheep();
@@ -114,7 +114,7 @@ int main() {
 	u_int pvt = env->env_id;
 
 	volatile u_int *shm = (u_int *)0x1000000;
-	syscall_mem_alloc(0, (void *)shm, PTE_D | PTE_LIBRARY);
+	syscall_mem_alloc(0, (void *)shm, PTE_W | PTE_LIBRARY);
 
 	volatile u_int *srvs = shm + 1000;
 	int i;

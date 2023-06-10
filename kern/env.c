@@ -93,8 +93,8 @@ static void map_segment(Pde *pgdir, u_int asid, u_long pa, u_long va, u_int size
  */
 u_int mkenvid(struct Env *e) {
 	static u_int i = 0;
+	// printk("==============================make %d\n", (e - envs));
 	return ((++i) << (1 + LOG2NENV)) | (e - envs);
-	printk("make %u\n", i);
 }
 
 /* Overview:
@@ -245,7 +245,6 @@ static int env_setup_vm(struct Env *e) {
 int env_alloc(struct Env **new, u_int parent_id) {
 	int r;
 	struct Env *e;
-
 	/* Step 1: Get a free Env from 'env_free_list' */
 	/* Exercise 3.4: Your code here. (1/4) */
 	if(LIST_EMPTY(&env_free_list))

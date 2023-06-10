@@ -72,7 +72,7 @@ int main() {
 			ptr[200] = i;
 			ptr[300] = 4;
 			debugf("@@@@grandson %x send Page to son %x\n", syscall_getenvid(), i);
-			ipc_send(i, 0, ptr, PTE_D | PTE_LIBRARY);
+			ipc_send(i, 0, ptr, PTE_W | PTE_LIBRARY);
 
 			debugf("@@@@grandson %x is waiting ack from son %x\n", syscall_getenvid(),
 			       i);
