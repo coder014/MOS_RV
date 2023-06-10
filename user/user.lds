@@ -14,17 +14,16 @@ SECTIONS {
 	. = 0x00400000;
 
 	.text : {
-		*(.text)
-		*(.rodata)
-		*(.rodata.*)
+		*(.text .text.*)
+		*(.rodata .rodata.*)
 	} : code
 
 	.data ALIGN(4096) : {
-		*(.data)
+		*(.data .data.* .sdata .sdata.*)
 	} : data
 
 	.bss ALIGN(4096) : {
-		*(.bss)
+		*(.bss .bss.* .sbss .sbss.*)
 	} : data
 
 	end = . ;

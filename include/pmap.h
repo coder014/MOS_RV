@@ -65,6 +65,7 @@ void riscv_init(void);
 void page_init(void);
 void *alloc(u_int n, u_int align, int clear);
 
+int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte);
 int page_alloc(struct Page **pp);
 void page_free(struct Page *pp);
 void page_decref(struct Page *pp);

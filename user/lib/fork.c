@@ -21,16 +21,17 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	/* Hint: Use 'vpt' and 'VPN' to find the page table entry. If the 'perm' doesn't have
 	 * 'PTE_COW', launch a 'user_panic'. */
 	/* Exercise 4.13: Your code here. (1/6) */
-	perm = vpt[VPN(va)] & 0xFFF;
+	perm = PTE_BITS(vpt[VPN(va)]);
+	
 	if(!(perm & PTE_COW))	user_panic("page of va 0x%x doesn't have PTE_COW flag", va);
 
 	/* Step 2: Remove 'PTE_COW' from the 'perm', and add 'PTE_D' to it. */
 	/* Exercise 4.13: Your code here. (2/6) */
-	perm = (perm & ~PTE_COW) | PTE_D;
+	perm = (perm & ~PTE_COW) | PTE_W;
 
 	/* Step 3: Allocate a new page at 'UCOW'. */
 	/* Exercise 4.13: Your code here. (3/6) */
-	syscall_mem_alloc(0, UCOW, PTE_D);
+	syscall_mem_alloc(0, UCOW, PTE_W);
 
 	/* Step 4: Copy the content of the faulting page at 'va' to 'UCOW'. */
 	/* Hint: 'va' may not be aligned to a page! */
@@ -81,7 +82,7 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Step 1: Get the permission of the page. */
 	/* Hint: Use 'vpt' to find the page table entry. */
 	/* Exercise 4.10: Your code here. (1/2) */
-	perm = vpt[vpn] & 0xFFF;
+	perm = PTE_BITS(vpt[vpn]);
 	addr = vpn << PGSHIFT;
 
 	/* Step 2: If the page is writable, and not shared with children, and not marked as COW yet,
@@ -89,11 +90,11 @@ static void duppage(u_int envid, u_int vpn) {
 	/* Hint: The page should be first mapped to the child before remapped in the parent. (Why?)
 	 */
 	/* Exercise 4.10: Your code here. (2/2) */
-	if(!(perm & PTE_D) || (perm & PTE_LIBRARY)) { // Read-only page or Shared page or previous CoW page
+	if(!(perm & PTE_W) || (perm & PTE_LIBRARY)) { // Read-only page or Shared page or previous CoW page
 		syscall_mem_map(0, addr, envid, addr, perm);
 	} else { // Writable page
 		//if(perm & PTE_COW) debugf("What the hell PTE_D and PTE_COW showed up at the same time!\n");
-		perm = (perm & ~PTE_D) | PTE_COW;
+		perm = (perm & ~PTE_W) | PTE_COW;
 		syscall_mem_map(0, addr, envid, addr, perm);
 		syscall_mem_map(0, addr, 0, addr, perm);
 	}

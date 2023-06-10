@@ -317,6 +317,7 @@ static int load_icode_mapper(void *data, u_long va, size_t offset, u_int perm, c
 	}
 
 	/* Step 3: Insert 'p' into 'env->env_pgdir' at 'va' with 'perm'. */
+	// printk("inserting %08x+%x, len %x, perm %x\n", va, offset, len, perm);
 	return page_insert(env->env_pgdir, env->env_asid, p, va, perm | PTE_U);
 }
 
@@ -342,6 +343,7 @@ static void load_icode(struct Env *e, const void *binary, size_t size) {
 			// 'elf_load_seg' is defined in lib/elfloader.c
 			// 'load_icode_mapper' defines the way in which a page in this segment
 			// should be mapped.
+			// printk("loading a seg...\n");
 			panic_on(elf_load_seg(ph, binary + ph->p_offset, load_icode_mapper, e));
 		}
 	}

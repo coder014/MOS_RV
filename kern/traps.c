@@ -40,13 +40,38 @@ static void normal_page_fault(struct Trapframe *tf)
 	_do_tlb_refill(tf->badvaddr, (tmp & 0x7FFFFFFF) >> 22);
 }
 
+static void query_vpt(struct Trapframe *tf)
+{
+	u_int instr = *(u_int *)tf->epc;
+	if ((instr & 0b1111111) != 0b0000011) panic("user querying vpt not using LW");
+	if (((instr >> 12) & 0b111) != 0b010) panic("user querying vpt not using LW");
+	if (!cur_pgdir) panic("cur_pgdir is NULL");
+	u_int va = tf->badvaddr << 10;
+	Pte *res;
+	if (va >= UVPT && va < ULIM) {
+		res = cur_pgdir + PTX(va);
+	} else if (va < UVPT) {
+		pgdir_walk(cur_pgdir, va, 0, &res);
+	} else {
+		panic("trying to fetch kernel space vpt\n");
+	}
+	tf->regs[(instr >> 7) & 0b11111] = res ? *res : 0;
+	tf->epc += 4;
+}
+
 static void exception_handler(struct Trapframe *tf)
 {
 	switch (tf->cause) {
+		case CAUSE_FAULT_FETCH:
+			panic("unknown instr at %08x : %08x", tf->epc, *(u_int*)tf->epc);
+			break;
 		case CAUSE_USER_ECALL:
 			do_syscall(tf);
 			break;
 		case CAUSE_FAULT_LOAD:
+			if (tf->badvaddr >= UVPT && tf->badvaddr < ULIM) query_vpt(tf);
+			else normal_page_fault(tf);
+			break;
 		case CAUSE_FAULT_STORE:
 			normal_page_fault(tf);
 			break;
