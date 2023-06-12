@@ -20,13 +20,7 @@
 	})
 
 // Page number field of an address
-#define PPN(pa)                                                                           \
-	({                                                                                    \
-		u_long a = (u_long)(pa);                                                          \
-		if (a < KSEG0)                                                                    \
-			panic("PPN called with invalid pa %08lx", a);                                 \
-		a >> 12;                                                                \
-	})
+#define PPN(pa) (((u_long)(pa)) >> 12)
 #define VPN(va) (((u_long)(va)) >> 12)
 
 /* Page Table/Directory Entry flags */
@@ -56,6 +50,7 @@
 // Memory segments (32-bit kernel mode addresses)
 #define KUSEG 0x00000000U
 #define KSEG0 0x80000000U
+#define KMMIO 0xA0000000U
 
 /*
  * Part 2.  Our conventions.

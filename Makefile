@@ -27,7 +27,7 @@ ifeq ($(call lab-ge,5),true)
 	targets         += fs-image
 endif
 
-qemu_flags              += -machine virt -m 64M -nographic -no-reboot
+qemu_flags              += -machine virt -m 64M -nographic -no-reboot -global virtio-mmio.force-legacy=false
 CFLAGS                  += -DLAB=$(shell echo $(lab) | cut -f1 -d_)
 
 objects                 := $(addsuffix /*.o, $(modules)) $(addsuffix /*.x, $(user_modules))
@@ -83,8 +83,7 @@ dbg: qemu_flags += -s -S
 dbg: run
 endif
 
-#run: qemu_flags += -E $(shell gxemul -H | grep -q oldtestmips && echo old)testmips \
-			$(shell [ -f '$(user_disk)' ] && echo '-d $(user_disk)')
+run: qemu_flags += $(shell [ -f '$(user_disk)' ] && echo '-drive file=$(user_disk),if=none,format=raw,id=hd -device virtio-blk-device,drive=hd,bus=virtio-mmio-bus.0')
 run:
 	qemu-system-riscv32 -kernel $(qemu_files) $(qemu_flags)
 

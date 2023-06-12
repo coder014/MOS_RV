@@ -11,7 +11,7 @@ USERLIB              := entry.o \
 			ipc.o
 
 ifeq ($(call lab-ge,5), true)
-	INITAPPS     += devtst.x fstest.x
+	INITAPPS     += fstest.x
 	USERLIB      += fd.o \
 			pageref.o \
 			file.o \

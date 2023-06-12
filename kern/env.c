@@ -172,7 +172,7 @@ void env_init(void) {
 
 	/*
 	 * We want to map 'UPAGES' and 'UENVS' to *every* user space with PTE_G permission (without
-	 * PTE_D), then user programs can read (but cannot write) kernel data structures 'pages' and
+	 * PTE_W), then user programs can read (but cannot write) kernel data structures 'pages' and
 	 * 'envs'.
 	 *
 	 * Here we first map them into the *template* page directory 'base_pgdir'.
@@ -187,7 +187,7 @@ void env_init(void) {
 		    PTE_G | PTE_U);
 	map_segment(base_pgdir, 0, PADDR(envs), UENVS, ROUND(NENV * sizeof(struct Env), BY2PG),
 		    PTE_G | PTE_U);
-	memcpy(base_pgdir + PDX(KSEG0), kbasepgdir + PDX(KSEG0), sizeof(Pde) * (npage / 1024));
+	memcpy(base_pgdir + PDX(KSEG0), kbasepgdir + PDX(KSEG0), sizeof(Pde) * 512);
 }
 
 /* Overview:
@@ -215,7 +215,7 @@ static int env_setup_vm(struct Env *e) {
 	memcpy(e->env_pgdir + PDX(UTOP), base_pgdir + PDX(UTOP),
 	       sizeof(Pde) * (PDX(UVPT) - PDX(UTOP)));
 	memcpy(e->env_pgdir + PDX(KSEG0), base_pgdir + PDX(KSEG0),
-	       sizeof(Pde) * (npage / 1024));
+	       sizeof(Pde) * 512);
 
 	/* Step 3: Map its own page table at 'UVPT' with readonly permission.
 	 * As a result, user programs can read its page table through 'UVPT' */

@@ -79,9 +79,10 @@ void riscv_vm_init() {
 	printk("to memory %x for struct Pages and kernelbase pagedir.\n", freemem);
 	kbasepgdir = (u_long *)alloc(BY2PG, BY2PG, 1);
 	for(u_long i = KSEG0; i < KSEG0 + memsize; i+=PDMAP) {
-		kbasepgdir[PDX(i)] = PADDR2PTE(i) | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X | PTE_V;
+		kbasepgdir[PDX(i)] = PADDR2PTE(i) | PTE_G | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X | PTE_V;
 		//printk("kbasepgdir[%d] = %08lx\n", PDX(i), kbasepgdir[PDX(i)]);
 	}
+	kbasepgdir[PDX(KMMIO)] = 0x04000000U | PTE_G | PTE_A | PTE_D | PTE_R | PTE_W | PTE_V;
 	u_int atp = 0x80000000U | PPN(kbasepgdir);
 	write_csr(satp, atp);
 	set_csr(sstatus, SSTATUS_SUM);
@@ -168,7 +169,7 @@ void page_free(struct Page *pp) {
 
 /* Overview:
  *   Given 'pgdir', a pointer to a page directory, 'pgdir_walk' returns a pointer to the page table
- *   entry (with permission PTE_D|PTE_V) for virtual address 'va'.
+ *   entry (with permission PTE_V) for virtual address 'va'.
  *
  * Pre-Condition:
  *   'pgdir' is a two-level page table structure.
@@ -191,7 +192,7 @@ int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
 	pgdir_entryp = pgdir + PDX(va);
 
 	/* Step 2: If the corresponding page table is not existent (valid) and parameter `create`
-	 * is set, create one. Set the permission bits 'PTE_D | PTE_V' for this new page in the
+	 * is set, create one. Set the permission bits 'PTE_V' for this new page in the
 	 * page directory.
 	 * If failed to allocate a new page (out of memory), return the error. */
 	/* Exercise 2.6: Your code here. (2/3) */

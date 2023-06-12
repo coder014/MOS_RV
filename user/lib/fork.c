@@ -25,7 +25,7 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	
 	if(!(perm & PTE_COW))	user_panic("page of va 0x%x doesn't have PTE_COW flag", va);
 
-	/* Step 2: Remove 'PTE_COW' from the 'perm', and add 'PTE_D' to it. */
+	/* Step 2: Remove 'PTE_COW' from the 'perm', and add 'PTE_W' to it. */
 	/* Exercise 4.13: Your code here. (2/6) */
 	perm = (perm & ~PTE_COW) | PTE_W;
 
@@ -59,8 +59,8 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
  *   children.
  *
  * Post-Condition:
- *   If the virtual page 'vpn' has 'PTE_D' and doesn't has 'PTE_LIBRARY', both our original virtual
- *   page and 'envid''s newly-mapped virtual page should be marked 'PTE_COW' and without 'PTE_D',
+ *   If the virtual page 'vpn' has 'PTE_W' and doesn't has 'PTE_LIBRARY', both our original virtual
+ *   page and 'envid''s newly-mapped virtual page should be marked 'PTE_COW' and without 'PTE_W',
  *   while the other permission bits are kept.
  *
  *   If not, the newly-mapped virtual page in 'envid' should have the exact same permission as our
@@ -68,7 +68,7 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
  *
  * Hint:
  *   - 'PTE_LIBRARY' indicates that the page should be shared among a parent and its children.
- *   - A page with 'PTE_LIBRARY' may have 'PTE_D' at the same time, you should handle it correctly.
+ *   - A page with 'PTE_LIBRARY' may have 'PTE_W' at the same time, you should handle it correctly.
  *   - You can pass '0' as an 'envid' in arguments of 'syscall_*' to indicate current env because
  *     kernel 'envid2env' converts '0' to 'curenv').
  *   - You should use 'syscall_mem_map', the user space wrapper around 'msyscall' to invoke
@@ -93,7 +93,7 @@ static void duppage(u_int envid, u_int vpn) {
 	if(!(perm & PTE_W) || (perm & PTE_LIBRARY)) { // Read-only page or Shared page or previous CoW page
 		syscall_mem_map(0, addr, envid, addr, perm);
 	} else { // Writable page
-		//if(perm & PTE_COW) debugf("What the hell PTE_D and PTE_COW showed up at the same time!\n");
+		//if(perm & PTE_COW) debugf("What the hell PTE_W and PTE_COW showed up at the same time!\n");
 		perm = (perm & ~PTE_W) | PTE_COW;
 		syscall_mem_map(0, addr, envid, addr, perm);
 		syscall_mem_map(0, addr, 0, addr, perm);
