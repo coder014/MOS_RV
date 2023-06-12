@@ -2,7 +2,7 @@
 #define __SBI_CONSOLE_H_
 
 void printcharc(char ch);
-char scancharc(void);
+long scancharc(void);
 void halt(void);
 
 #endif
