@@ -23,13 +23,13 @@ static struct _disk {
 	// disk operations. there are NUM descriptors.
 	// most commands consist of a "chain" (a linked list) of a couple of
 	// these descriptors.
-	volatile struct virtq_desc *desc;
+	struct virtq_desc *desc;
 
 	// a ring in which the driver writes descriptor numbers
 	// that the driver would like the device to process.  it only
 	// includes the head descriptor of each chain. the ring has
 	// NUM elements.
-	volatile struct virtq_avail *avail;
+	struct virtq_avail *avail;
 
 	// a ring in which the device writes descriptor numbers that
 	// the device has finished processing (just the head of each chain).
@@ -121,6 +121,21 @@ void ide_init()
 	// tell device we're completely ready.
   	status |= VIRTIO_CONFIG_S_DRIVER_OK;
 	MMIO_OUT(VIRTIO_MMIO_STATUS, status);
+
+	disk.op->reserved = 0;
+	disk.desc[0].addr = VA2PA(disk.op);
+	disk.desc[0].len = sizeof(struct virtio_blk_req);
+	disk.desc[0].flags = VRING_DESC_F_NEXT;
+	disk.desc[0].next = 1;
+
+	disk.desc[1].addr = VA2PA(&disk_buf);
+	disk.desc[1].len = BY2PG;
+	disk.desc[1].next = 2;
+
+	disk.desc[2].addr = VA2PA(&disk.status);
+	disk.desc[2].len = 1;
+	disk.desc[2].flags = VRING_DESC_F_WRITE;
+	disk.desc[2].next = 0;
 #ifdef MOS_DEBUG
 	debugf("ide_init succeeded!\n");
 #endif
@@ -130,43 +145,27 @@ static void virtio_disk_rw(u_int secno, int write)
 {
 	if(write) disk.op->type = VIRTIO_BLK_T_OUT;
 	else disk.op->type = VIRTIO_BLK_T_IN;
-	disk.op->reserved = 0;
 	disk.op->sector = secno;
 
-	disk.desc[0].addr = (u_long)VA2PA(disk.op);
-	disk.desc[0].len = sizeof(struct virtio_blk_req);
-	disk.desc[0].flags = VRING_DESC_F_NEXT;
-	disk.desc[0].next = 1;
-
-	disk.desc[1].addr = (u_long)VA2PA(&disk_buf);
-	disk.desc[1].len = BY2PG;
 	if(write) disk.desc[1].flags = 0;
 	else disk.desc[1].flags = VRING_DESC_F_WRITE;
 	disk.desc[1].flags |= VRING_DESC_F_NEXT;
-	disk.desc[1].next = 2;
 
 	disk.status = 0xff; // device writes 0 on success
-	disk.desc[2].addr = (u_long)VA2PA(&disk.status);
-	disk.desc[2].len = 1;
-	disk.desc[2].flags = VRING_DESC_F_WRITE;
-	disk.desc[2].next = 0;
 
 	// tell the device the first index in our chain of descriptors.
 	disk.avail->ring[disk.avail->idx % NUM] = 0;
-	__sync_synchronize();
 	disk.avail->idx += 1;
-	__sync_synchronize();
 	MMIO_OUT(VIRTIO_MMIO_QUEUE_NOTIFY, 0); // value is queue number
-	__sync_synchronize();
+
 	do {
 		// debugf("waiting for disk IO to finish.... %u\n", disk.used->idx);
 	} while(disk.used_idx + 1 != disk.used->idx);
-	__sync_synchronize();
 	user_assert(++disk.used_idx == disk.used->idx);
 	user_assert(disk.used->ring[disk.used_idx % NUM].id == 0);
 	user_assert(disk.status == VIRTIO_BLK_S_OK);
 
-	memset(disk.desc, 0, 3 * sizeof(struct virtq_desc));
+	// memset(disk.desc, 0, 3 * sizeof(struct virtq_desc));
 }
 
 void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
