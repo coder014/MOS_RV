@@ -37,8 +37,10 @@ void riscv_detect_memory(u_int dtb) {
    Post-Condition:
     If we're out of memory, should panic, else return this address of memory we have allocated.*/
 void *alloc(u_int n, u_int align, int clear) {
-	extern char end[];
+	extern u_char end[];
+	extern u_char bss_end[];
 	u_long alloced_mem;
+	assert((u_long)(&bss_end) + BY2PG <= KSTACKTOP);
 
 	/* Initialize `freemem` if this is the first time. The first virtual address that the
 	 * linker did *not* assign to any kernel code or global variables. */

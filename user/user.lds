@@ -15,7 +15,7 @@ SECTIONS {
 
 	.text : {
 		*(.text .text.*)
-		*(.rodata .rodata.*)
+		*(.rodata .rodata.* .srodata .srodata.*)
 	} : code
 
 	.data ALIGN(4096) : {

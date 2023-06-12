@@ -9,13 +9,12 @@ SECTIONS {
     .text : {
         *(.boot)
         *(.text .text.*)
+        *(.rodata .rodata.* .srodata .srodata.*)
     }
-    PROVIDE(etext = .);
 
     .data : {
         *(.data .data.* .sdata .sdata.*)
     }
-    PROVIDE(edata = .);
 
     .bss  : {
         *(.bss .bss.* .sbss .sbss.*)
