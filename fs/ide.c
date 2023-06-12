@@ -15,6 +15,7 @@
 #define MMIO_OUT(__r, value) syscall_write_dev(VIRTIO0 | (__r), (value))
 
 static u_char buf[BY2PG] __attribute__((aligned(BY2PG)));
+static u_char disk_buf[BY2PG] __attribute__((aligned(BY2PG)));
 
 static struct _disk {
 	// a set (not a ring) of DMA descriptors, with which the
@@ -124,7 +125,7 @@ void ide_init()
 	// debugf("ide_init succeeded!\n");
 }
 
-static void virtio_disk_rw(u_int secno, u_int pa, int write)
+static void virtio_disk_rw(u_int secno, int write)
 {
 	if(write) disk.op->type = VIRTIO_BLK_T_OUT;
 	else disk.op->type = VIRTIO_BLK_T_IN;
@@ -136,8 +137,8 @@ static void virtio_disk_rw(u_int secno, u_int pa, int write)
 	disk.desc[0].flags = VRING_DESC_F_NEXT;
 	disk.desc[0].next = 1;
 
-	disk.desc[1].addr = pa;
-	disk.desc[1].len = BY2SECT;
+	disk.desc[1].addr = (u_long)VA2PA(&disk_buf);
+	disk.desc[1].len = BY2PG;
 	if(write) disk.desc[1].flags = 0;
 	else disk.desc[1].flags = VRING_DESC_F_WRITE;
 	disk.desc[1].flags |= VRING_DESC_F_NEXT;
@@ -168,13 +169,17 @@ static void virtio_disk_rw(u_int secno, u_int pa, int write)
 }
 
 void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
-	for (u_int i = 0; i < nsecs; i++) {
-		virtio_disk_rw(secno + i, VA2PA(dst + (i * BY2SECT)), 0);
+	user_assert(nsecs % SECT2BLK == 0);
+	for (u_int i = 0; i < nsecs; i+=SECT2BLK) {
+		virtio_disk_rw(secno + i, 0);
+		memcpy(dst + (i * BY2SECT), disk_buf, BY2PG);
 	}
 }
 
 void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
-	for (u_int i = 0; i < nsecs; i++) {
-		virtio_disk_rw(secno + i, VA2PA(src + (i * BY2SECT)), 1);
+	user_assert(nsecs % SECT2BLK == 0);
+	for (u_int i = 0; i < nsecs; i+=SECT2BLK) {
+		memcpy(disk_buf, src + (i * BY2SECT), BY2PG);
+		virtio_disk_rw(secno + i, 1);
 	}
 }

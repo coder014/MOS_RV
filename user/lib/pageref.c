@@ -12,6 +12,5 @@ int pageref(void *v) {
 	if (!(pte & PTE_V)) {
 		return 0;
 	}
-
-	return pages[PPN(PTE2PADDR(pte))].pp_ref;
+	return pages[PPN(PTE2PADDR(pte)) - PPNOFFSET].pp_ref;
 }

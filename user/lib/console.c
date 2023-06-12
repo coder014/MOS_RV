@@ -32,7 +32,7 @@ int opencons(void) {
 	if ((r = fd_alloc(&fd)) < 0) {
 		return r;
 	}
-	if ((r = syscall_mem_alloc(0, fd, PTE_D | PTE_LIBRARY)) < 0) {
+	if ((r = syscall_mem_alloc(0, fd, PTE_W | PTE_LIBRARY)) < 0) {
 		return r;
 	}
 	fd->fd_dev_id = devcons.dev_id;
