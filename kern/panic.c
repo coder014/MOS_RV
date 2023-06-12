@@ -13,7 +13,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	asm volatile("csrr %0, sstatus" : "=r"(status) );
 	asm volatile("csrr %0, scause" : "=r"(cause) );
 	asm volatile("csrr %0, sepc" : "=r"(epc) );
-
+#ifdef MOS_DEBUG
 	printk("panic at %s:%d (%s): ", file, line, func);
 
 	va_list ap;
@@ -47,6 +47,7 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	} else {
 		printk("cur_pgdir: NULL\n", cur_pgdir);
 	}
+#endif
 #endif
 
 #ifdef MOS_HANG_ON_PANIC

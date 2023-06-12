@@ -25,8 +25,9 @@ void riscv_detect_memory(u_int dtb) {
 	/* Step 2: Calculate the corresponding 'npage' value. */
 	/* Exercise 2.1: Your code here. */
 	npage = memsize / BY2PG;
-
+#ifdef MOS_DEBUG
 	printk("Memory size: %lu KiB, number of pages: %lu\n", memsize / 1024, npage);
+#endif
 }
 
 /* Overview:
@@ -76,17 +77,20 @@ void riscv_vm_init() {
 	 * physical address `pages` allocated before. For consideration of alignment,
 	 * you should round up the memory size before map. */
 	pages = (struct Page *)alloc(npage * sizeof(struct Page), BY2PG, 1);
+#ifdef MOS_DEBUG
 	printk("to memory %x for struct Pages and kernelbase pagedir.\n", freemem);
+#endif
 	kbasepgdir = (u_long *)alloc(BY2PG, BY2PG, 1);
 	for(u_long i = KSEG0; i < KSEG0 + memsize; i+=PDMAP) {
 		kbasepgdir[PDX(i)] = PADDR2PTE(i) | PTE_G | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X | PTE_V;
-		//printk("kbasepgdir[%d] = %08lx\n", PDX(i), kbasepgdir[PDX(i)]);
 	}
 	kbasepgdir[PDX(KMMIO)] = 0x04000000U | PTE_G | PTE_A | PTE_D | PTE_R | PTE_W | PTE_V;
 	u_int atp = 0x80000000U | PPN(kbasepgdir);
 	write_csr(satp, atp);
 	set_csr(sstatus, SSTATUS_SUM);
+#ifdef MOS_DEBUG
 	printk("pmap.c:\t risc-v vm init success, now in virtual address mode.\n");
+#endif
 }
 
 /* Overview:

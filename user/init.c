@@ -19,28 +19,33 @@ int sum(char *s, int n) {
 
 int main(int argc, char **argv) {
 	int i, r, x, want;
-
+#ifdef MOS_DEBUG
 	debugf("init: running\n");
-
+#endif
 	want = 0xf989e;
 	if ((x = sum((char *)&data, sizeof data)) != want) {
 		debugf("init: data is not initialized: got sum %08x wanted %08x\n", x, want);
 	} else {
+#ifdef MOS_DEBUG
 		debugf("init: data seems okay\n");
+#endif
 	}
 	if ((x = sum(bss, sizeof bss)) != 0) {
 		debugf("bss is not initialized: wanted sum 0 got %08x\n", x);
 	} else {
+#ifdef MOS_DEBUG
 		debugf("init: bss seems okay\n");
+#endif
 	}
 
+#ifdef MOS_DEBUG
 	debugf("init: args:");
 	for (i = 0; i < argc; i++) {
 		debugf(" '%s'", argv[i]);
 	}
 	debugf("\n");
-
 	debugf("init: running sh\n");
+#endif
 
 	// stdin should be 0, because no file descriptors are open yet
 	if ((r = opencons()) != 0) {
@@ -52,7 +57,9 @@ int main(int argc, char **argv) {
 	}
 
 	while (1) {
+#ifdef MOS_DEBUG
 		debugf("init: starting sh\n");
+#endif
 		r = spawnl("sh.b", "sh", NULL);
 		if (r < 0) {
 			debugf("init: spawn sh: %d\n", r);

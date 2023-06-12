@@ -121,8 +121,9 @@ void ide_init()
 	// tell device we're completely ready.
   	status |= VIRTIO_CONFIG_S_DRIVER_OK;
 	MMIO_OUT(VIRTIO_MMIO_STATUS, status);
-
-	// debugf("ide_init succeeded!\n");
+#ifdef MOS_DEBUG
+	debugf("ide_init succeeded!\n");
+#endif
 }
 
 static void virtio_disk_rw(u_int secno, int write)

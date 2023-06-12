@@ -265,8 +265,9 @@ void read_super(void) {
 	if (super->s_nblocks > DISKMAX / BY2BLK) {
 		user_panic("file system is too large");
 	}
-
+#ifdef MOS_DEBUG
 	debugf("superblock is good\n");
+#endif
 }
 
 // Overview:
@@ -297,8 +298,9 @@ void read_bitmap(void) {
 	for (i = 0; i < nbitmap; i++) {
 		user_assert(!block_is_free(i + 2));
 	}
-
+#ifdef MOS_DEBUG
 	debugf("read_bitmap is good\n");
+#endif
 }
 
 // Overview:

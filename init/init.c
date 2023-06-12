@@ -14,7 +14,9 @@
 #else
 
 void rv32_init(u_int hartid, u_int dtb) { // two args from previous hart
+#ifdef MOS_DEBUG
 	printk("init.c:\trv32_init() is called\n");
+#endif
 
 	// lab2:
 	riscv_detect_memory(dtb);

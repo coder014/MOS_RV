@@ -78,7 +78,9 @@ int sys_env_destroy(u_int envid) {
 	struct Env *e;
 	try(envid2env(envid, &e, 1));
 
+#ifdef MOS_DEBUG
 	printk("[%08x] destroying %08x\n", curenv->env_id, e->env_id);
+#endif
 	env_destroy(e);
 	return 0;
 }
@@ -332,7 +334,7 @@ int sys_set_trapframe(u_int envid, struct Trapframe *tf) {
  * 	This function will halt the system.
  */
 void sys_panic(char *msg) {
-	panic("%s", TRUP(msg));
+	panic("%s\n", TRUP(msg));
 }
 
 /* Overview:

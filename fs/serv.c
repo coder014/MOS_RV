@@ -258,7 +258,9 @@ void serve(void) {
 int main() {
 	user_assert(sizeof(struct File) == BY2FILE);
 	ide_init();
+#ifdef MOS_DEBUG
 	debugf("FS is running\n");
+#endif
 
 	serve_init();
 	fs_init();
