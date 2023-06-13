@@ -6,6 +6,7 @@
 void outputk(void *data, const char *buf, size_t len);
 
 void _panic(const char *file, int line, const char *func, const char *fmt, ...) {
+#ifdef MOS_DEBUG
 	u_long sp, ra, badva, status, cause, epc;
 	asm volatile("mv %0, x2" : "=r"(sp) );
 	asm volatile("mv %0, x1" : "=r"(ra) );
@@ -13,7 +14,6 @@ void _panic(const char *file, int line, const char *func, const char *fmt, ...) 
 	asm volatile("csrr %0, sstatus" : "=r"(status) );
 	asm volatile("csrr %0, scause" : "=r"(cause) );
 	asm volatile("csrr %0, sepc" : "=r"(epc) );
-#ifdef MOS_DEBUG
 	printk("panic at %s:%d (%s): ", file, line, func);
 
 	va_list ap;

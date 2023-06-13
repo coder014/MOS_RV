@@ -223,7 +223,11 @@ int main(int argc, char **argv) {
 	int echocmds = 0;
 	debugf("\n:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
 	debugf("::                                                         ::\n");
-	debugf("::                     MOS Shell 2023                      ::\n");
+	debugf("::                                                         ::\n");
+	debugf("::                 MOS Shell (RISC-V) 2023                 ::\n");
+	debugf("::                                                         ::\n");
+	debugf("::                   Ported by Coder014                    ::\n");
+	debugf("::                                                         ::\n");
 	debugf("::                                                         ::\n");
 	debugf(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::\n");
 	ARGBEGIN {

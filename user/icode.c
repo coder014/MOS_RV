@@ -14,7 +14,7 @@ int main() {
 #endif
 	while ((n = read(fd, buf, sizeof buf - 1)) > 0) {
 		buf[n] = 0;
-		debugf("%s\n", buf);
+		debugf("%s", buf);
 	}
 #ifdef MOS_DEBUG
 	debugf("icode: close /motd\n");

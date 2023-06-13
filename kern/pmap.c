@@ -38,9 +38,7 @@ void riscv_detect_memory(u_int dtb) {
     If we're out of memory, should panic, else return this address of memory we have allocated.*/
 void *alloc(u_int n, u_int align, int clear) {
 	extern u_char end[];
-	extern u_char bss_end[];
 	u_long alloced_mem;
-	assert((u_long)(&bss_end) + BY2PG <= KSTACKTOP);
 
 	/* Initialize `freemem` if this is the first time. The first virtual address that the
 	 * linker did *not* assign to any kernel code or global variables. */
@@ -78,11 +76,14 @@ void riscv_vm_init() {
 	 * for physical memory management. Then, map virtual address `UPAGES` to
 	 * physical address `pages` allocated before. For consideration of alignment,
 	 * you should round up the memory size before map. */
+	extern u_char bss_end[];
+	assert((u_long)(&bss_end) + BY2PG * 16 <= KSTACKTOP);
+
 	pages = (struct Page *)alloc(npage * sizeof(struct Page), BY2PG, 1);
+	kbasepgdir = (u_long *)alloc(BY2PG, BY2PG, 1);
 #ifdef MOS_DEBUG
 	printk("to memory %x for struct Pages and kernelbase pagedir.\n", freemem);
 #endif
-	kbasepgdir = (u_long *)alloc(BY2PG, BY2PG, 1);
 	for(u_long i = KSEG0; i < KSEG0 + memsize; i+=PDMAP) {
 		kbasepgdir[PDX(i)] = PADDR2PTE(i) | PTE_G | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X | PTE_V;
 	}
